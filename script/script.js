@@ -16,6 +16,7 @@ window.addEventListener('DOMContentLoaded', () => {
             return { timeRemaining, hours, minutes, seconds };
         }
 
+        updateClock();
         const intervalIndex = setInterval(() => {
             updateClock();
         }, 1000);
