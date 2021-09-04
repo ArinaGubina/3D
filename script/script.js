@@ -60,21 +60,28 @@ window.addEventListener('DOMContentLoaded', () => {
         const btnMenu = document.querySelector('.menu'),
             menu = document.querySelector('menu'),
             closeBtn = document.querySelector('.close-btn'),
-            menuItems = menu.querySelectorAll('ul>li>a');
-        const handlerMenu = event => {
-            menu.classList.toggle('active-menu');
-            event.preventDefault();
+            menuItems = menu.querySelectorAll('ul>li>a'),
+            wtfBtn = document.querySelector('main>a');
 
-            const attr = event.target.getAttribute('href');
+        const scrollTo = event => {
+            event.preventDefault();
+            console.log(event.target);
+            // eslint-disable-next-line max-len
+            const attr = (event.target.getAttribute('href')) ? event.target.getAttribute('href') : event.target.parentElement.getAttribute('href');
             if (attr) {
                 const section = document.querySelector(attr);
                 section.scrollIntoView({ block: "start", behavior: "smooth" });
             }
         };
+        const handlerMenu = event => {
+            menu.classList.toggle('active-menu');
+            scrollTo(event);
+        };
         btnMenu.addEventListener('click', handlerMenu);
         closeBtn.addEventListener('click', handlerMenu);
 
         menuItems.forEach(elem => elem.addEventListener('click', handlerMenu));
+        wtfBtn.addEventListener('click', scrollTo);
     };
     toggleMenu();
 
