@@ -60,9 +60,16 @@ window.addEventListener('DOMContentLoaded', () => {
         const btnMenu = document.querySelector('.menu'),
             menu = document.querySelector('menu'),
             closeBtn = document.querySelector('.close-btn'),
-            menuItems = menu.querySelectorAll('ul>li');
-        const handlerMenu = () => {
+            menuItems = menu.querySelectorAll('ul>li>a');
+        const handlerMenu = event => {
             menu.classList.toggle('active-menu');
+            event.preventDefault();
+
+            const attr = event.target.getAttribute('href');
+            if (attr) {
+                const section = document.querySelector(attr);
+                section.scrollIntoView({ block: "start", behavior: "smooth" });
+            }
         };
         btnMenu.addEventListener('click', handlerMenu);
         closeBtn.addEventListener('click', handlerMenu);
