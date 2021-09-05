@@ -36,8 +36,8 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         // Что-то я слегка отстала. Надо подсчитать, сколько времени осталось на выполнение оставшихся уроков :)
-        const lessons = 17,
-            points = 26;
+        const lessons = 20,
+            points = 28;
 
         setTimeout(() => {
             const timerDiploma = getTimeRemaining(deadLine),
@@ -57,31 +57,34 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // меню
     const toggleMenu = () => {
-        const btnMenu = document.querySelector('.menu'),
-            menu = document.querySelector('menu'),
-            closeBtn = document.querySelector('.close-btn'),
-            menuItems = menu.querySelectorAll('ul>li>a'),
-            wtfBtn = document.querySelector('main>a');
+        const menu = document.querySelector('menu'),
+            body = document.querySelector('body');
 
         const scrollTo = event => {
             event.preventDefault();
-            console.log(event.target);
-            // eslint-disable-next-line max-len
-            const attr = (event.target.getAttribute('href')) ? event.target.getAttribute('href') : event.target.parentElement.getAttribute('href');
-            if (attr) {
-                const section = document.querySelector(attr);
-                section.scrollIntoView({ block: "start", behavior: "smooth" });
+            const hr = event.target.closest('a[href]');
+            if (hr) {
+                const section = document.querySelector(hr.getAttribute('href'));
+                if (section) {
+                    section.scrollIntoView({ block: "start", behavior: "smooth" });
+                }
             }
         };
         const handlerMenu = event => {
-            menu.classList.toggle('active-menu');
-            scrollTo(event);
+            if (event.target.closest('.menu') || event.target.closest('menu')) {
+                menu.classList.toggle('active-menu');
+            }
+            if (!event.target.closest('.menu')) {
+                scrollTo(event);
+            }
         };
-        btnMenu.addEventListener('click', handlerMenu);
-        closeBtn.addEventListener('click', handlerMenu);
-
-        menuItems.forEach(elem => elem.addEventListener('click', handlerMenu));
-        wtfBtn.addEventListener('click', scrollTo);
+        body.addEventListener('click', event => {
+            if (event.target.closest('a[href]') || event.target.closest('.menu')) {
+                handlerMenu(event);
+            } else if (menu.classList.contains('active-menu') && !event.target.closest('menu')) {
+                menu.classList.remove('active-menu');
+            }
+        });
     };
     toggleMenu();
 
@@ -89,7 +92,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const togglePopup = () => {
         const popup = document.querySelector('.popup'),
             popupBtn = document.querySelectorAll('.popup-btn'),
-            popupClose = document.querySelector('.popup-close'),
             popupContent = document.querySelector('.popup-content');
 
         let popupInterval,
@@ -114,9 +116,48 @@ window.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        popupClose.addEventListener('click', () => {
-            popup.style.display = 'none';
+        popup.addEventListener('click', event => {
+            let target = event.target;
+            if (target.classList.contains('popup-close')) {
+                popup.style.display = 'none';
+            } else {
+                target = target.closest('.popup-content');
+                if (!target) {
+                    popup.style.display = 'none';
+                }
+            }
         });
     };
     togglePopup();
+
+    //tabs
+    const tabs = () => {
+        const tabHeader = document.querySelector('.service-header'),
+            tab = tabHeader.querySelectorAll('.service-header-tab'),
+            tabContent = document.querySelectorAll('.service-tab');
+
+        const toggleTabContent = index => {
+            for (let i = 0; i < tabContent.length; i++) {
+                if (index === i) {
+                    tab[i].classList.add('active');
+                    tabContent[i].classList.remove('d-none');
+                } else {
+                    tab[i].classList.remove('active');
+                    tabContent[i].classList.add('d-none');
+                }
+            }
+        };
+        tabHeader.addEventListener('click', event => {
+            let target = event.target;
+            target = target.closest('.service-header-tab');
+            if (target) {
+                tab.forEach((item, i) => {
+                    if (item === target) {
+                        toggleTabContent(i);
+                    }
+                });
+            }
+        });
+    };
+    tabs();
 });
