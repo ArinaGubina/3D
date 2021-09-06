@@ -147,6 +147,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
             }
         };
+        toggleTabContent(0);
         tabHeader.addEventListener('click', event => {
             let target = event.target;
             target = target.closest('.service-header-tab');
