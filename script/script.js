@@ -275,12 +275,10 @@ window.addEventListener('DOMContentLoaded', () => {
                 item.value = item.value.replace(regex, '');
             };
             item.onchange = () => {
-                console.log('onchange' + item.value);
                 item.value = item.value.replace(/ +/g, ' ').trim();
                 item.value = item.value.replace(/- /g, '-');
                 item.value = item.value.replace(/ -/g, '-');
                 item.value = item.value.replace(/-+/g, '-');
-                console.log('onchange' + item.value);
                 const str = item.value;
                 let newStr = '';
                 for (let i = 0; i < str.length; i++) {
@@ -328,11 +326,53 @@ window.addEventListener('DOMContentLoaded', () => {
         const phone = document.querySelectorAll('[type="tel"]');
         phone.forEach(item => {
             item.oninput = () => {
-                console.log('oninput' + item.value);
                 item.value = item.value.replace(regexNumPhone, '');
-                console.log('oninput' + item.value);
             };
         });
     };
     rules();
+
+    // калькулятор
+    const calc = (price = 100) => {
+        const calcBlock = document.querySelector('.calc-block'),
+            calcType = document.querySelector('.calc-type'),
+            calcSquare = document.querySelector('.calc-square'),
+            calcDay = document.querySelector('.calc-day'),
+            calcCount = document.querySelector('.calc-count'),
+            totalValue = document.getElementById('total');
+
+        const countSum = () => {
+            let total = 0,
+                countValue = 1,
+                dayValue = 1;
+            const typeValue = calcType.options[calcType.selectedIndex].value,
+                squareValue = calcSquare.value;
+            if (calcCount.value > 1) {
+                countValue += (calcCount.value - 1) / 10;
+            }
+            if (calcDay.value && calcDay.value < 5) {
+                dayValue *= 2;
+            } else if (calcDay.value && calcDay.value < 10) {
+                dayValue *= 1.5;
+            }
+            total = (typeValue && squareValue) ? price * typeValue * squareValue * countValue * dayValue : 0;
+            let cur = +totalValue.textContent;
+            console.log(cur);
+            const indexInterval = setInterval(() => {
+                if (total !== cur) {
+                    cur = (total > cur) ? cur + Math.ceil((total - cur) / 3) : cur - Math.ceil((cur - total) / 3);
+                    totalValue.textContent = cur;
+                } else {
+                    clearInterval(indexInterval);
+                }
+            }, 20);
+        };
+        calcBlock.addEventListener('change', event => {
+            const target = event.target;
+            if (target.matches('select') || target.matches('input')) {
+                countSum();
+            }
+        });
+    };
+    calc();
 });
