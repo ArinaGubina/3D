@@ -308,7 +308,7 @@ window.addEventListener('DOMContentLoaded', () => {
         // но у меня нет идей, почему он допускает ввод пробела,
         // а потом удаляет его при вводе нового символа
         // eslint-disable-next-line no-useless-escape
-        const regexEm = /[^A-Za-z\@\_\!\~\*\'\-\.]/g;
+        const regexEm = /[^A-Za-z0-9\@\_\!\~\*\'\-\.]/g;
         const email = document.querySelectorAll('[type="email"]');
         email.forEach(item => {
             item.oninput = () => {
@@ -356,16 +356,17 @@ window.addEventListener('DOMContentLoaded', () => {
                 dayValue *= 1.5;
             }
             total = (typeValue && squareValue) ? price * typeValue * squareValue * countValue * dayValue : 0;
-            let cur = +totalValue.textContent;
-            console.log(cur);
+            let cur = 0;
+            const time = 20;
             const indexInterval = setInterval(() => {
-                if (total !== cur) {
-                    cur = (total > cur) ? cur + Math.ceil((total - cur) / 3) : cur - Math.ceil((cur - total) / 3);
-                    totalValue.textContent = cur;
+                if (0.95 * total > cur || 1.05 * total < cur) {
+                    cur = (total > cur) ? cur + (total - cur) / 3 : cur - (cur - total) / 3;
+                    totalValue.textContent = Math.ceil(cur);
                 } else {
                     clearInterval(indexInterval);
+                    totalValue.textContent = Math.ceil(total);
                 }
-            }, 20);
+            }, time);
         };
         calcBlock.addEventListener('change', event => {
             const target = event.target;
