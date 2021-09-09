@@ -411,19 +411,18 @@ window.addEventListener('DOMContentLoaded', () => {
         const statusMessage = document.createElement('div');
         statusMessage.style.cssText = 'font-size: 2rem;';
 
-        const postData = (body, outputData, errorData) => {
+        // отправка на сервер
+        const postData = body => new Promise((resolve, reject) => {
             const request = new XMLHttpRequest();
 
             request.addEventListener('readystatechange', () => {
-                if (request.readyState !== 4) {
-                    return;
-                }
-                console.log(request.status);
-
-                if (request.status === 200) {
-                    outputData();
+                if (request.readyState === 4 && request.status === 200) {
+                    return resolve();
+                } else if (request.readyState === 4) {
+                    console.log(request.status);
+                    return reject(request.status);
                 } else {
-                    errorData(request.status);
+                    return;
                 }
             });
 
@@ -431,7 +430,7 @@ window.addEventListener('DOMContentLoaded', () => {
             request.setRequestHeader('Content-type', 'aplication/json');
             console.log(body);
             request.send(JSON.stringify(body));
-        };
+        });
 
         forms.forEach(item => {
             const formInputs = item.querySelectorAll('input');
@@ -446,13 +445,15 @@ window.addEventListener('DOMContentLoaded', () => {
                     formData.forEach((val, key) => {
                         body[key] = val;
                     });
-                    postData(body, () => {
-                        statusMessage.textContent = successMessage;
-                        formInputs.forEach(input => input.value = '');
-                    }, error => {
-                        statusMessage.textContent = errorMessage;
-                        console.error(error);
-                    });
+                    postData(body)
+                        .then(() => {
+                            statusMessage.textContent = successMessage;
+                            formInputs.forEach(input => input.value = '');
+                        })
+                        .catch(error => {
+                            statusMessage.textContent = errorMessage;
+                            console.error(error);
+                        });
                 } else {
                     statusMessage.textContent = errorField;
                 }
