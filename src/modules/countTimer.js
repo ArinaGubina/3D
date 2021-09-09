@@ -46,8 +46,8 @@ function countTimer(deadLine) {
             h30 = timer30.hours,
             m30 = timer30.minutes,
             t30 = (h30 * 60 + m30) / (30 - lessons);
-        console.log('Время на урок: ' + Math.floor(t30 / 60) + ':' + Math.floor(t30 % 60));
-        console.log('Время на балл: ' + Math.floor(t / 60) + ':' + Math.floor(t % 60));
+        // console.log('Время на урок: ' + Math.floor(t30 / 60) + ':' + Math.floor(t30 % 60));
+        // console.log('Время на балл: ' + Math.floor(t / 60) + ':' + Math.floor(t % 60));
     }, 3000);
 }
 
