@@ -257,6 +257,10 @@ window.addEventListener('DOMContentLoaded', () => {
     commandMagic();
 
     const rules = () => {
+        // ошибка в поле
+        const errorField = field => {
+            console.log(field);
+        };
         // ввод цифр
         const regexNum = /[^0-9]/; // регулярка только цифры
         const calcInp = document.querySelectorAll('.calc-block>input');
@@ -268,7 +272,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // ввод кириллицы
         const regex = /[^А-Яа-яЁё\s-]/g; // регулярка только русские буквы, пробел и дефис
-        const regexMessage = /[^А-Яа-яЁё\s-\.\!\?\,\:\;"]/g; // регулярка только русские буквы, пробел, дефис знаки препинания
+        // регулярка только русские буквы, пробел, дефис знаки препинания
+        // eslint-disable-next-line no-useless-escape
+        const regexMessage = /[^А-Яа-яЁё\s-\.\!\?\,\:\;"]/g;
         const yourName = document.querySelectorAll('[placeholder="Ваше имя"]'),
             yourMessage = document.querySelector('[placeholder="Ваше сообщение"]');
         yourName.forEach(item => {
@@ -380,9 +386,25 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // отправка формы на сервер
     const sendForm = () => {
+        // валидация полей перед отправкой на сервер
+        const validate = formInputs => {
+            let validation = true;
+            formInputs.forEach(input => {
+                if (input.value.length < 2 || (input.closest('.form-phone') &&
+                !((input.value.length === 12 && input.value[0] === '+') ||
+                (input.value.length === 11 && input.value[0] !== '+')))) {
+                    input.style.border = '2px solid red';
+                    validation = false;
+                } else {
+                    input.style.border = 'none';
+                }
+            });
+            return validation;
+        };
         const errorMessage = 'Что-то пошло не так',
             loadMessage = 'Загрузка...',
-            successMessage = 'Отлично! Ответ получен!';
+            successMessage = 'Отлично! Ответ получен!',
+            errorField = 'Поле заполнено неверно';
 
         const forms = document.querySelectorAll('form');
 
@@ -407,8 +429,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
             request.open('POST', './server.php');
             request.setRequestHeader('Content-type', 'aplication/json');
-
-            request.send(body);
+            console.log(body);
+            request.send(JSON.stringify(body));
         };
 
         forms.forEach(item => {
@@ -416,20 +438,24 @@ window.addEventListener('DOMContentLoaded', () => {
             item.addEventListener('submit', event => {
                 event.preventDefault();
                 item.appendChild(statusMessage);
-                statusMessage.textContent = loadMessage;
-                const formData = new FormData(item),
-                    body = {};
-
-                formData.forEach((val, key) => {
-                    body[key] = val;
-                });
-                postData(body, () => {
-                    statusMessage.textContent = successMessage;
-                    formInputs.forEach(input => input.value = '');
-                }, error => {
-                    statusMessage.textContent = errorMessage;
-                    console.error(error);
-                });
+                console.log(validate(formInputs));
+                if (validate(formInputs)) {
+                    statusMessage.textContent = loadMessage;
+                    const formData = new FormData(item),
+                        body = {};
+                    formData.forEach((val, key) => {
+                        body[key] = val;
+                    });
+                    postData(body, () => {
+                        statusMessage.textContent = successMessage;
+                        formInputs.forEach(input => input.value = '');
+                    }, error => {
+                        statusMessage.textContent = errorMessage;
+                        console.error(error);
+                    });
+                } else {
+                    statusMessage.textContent = errorField;
+                }
             });
         });
     };
