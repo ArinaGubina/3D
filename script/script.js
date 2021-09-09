@@ -36,20 +36,20 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         // Что-то я слегка отстала. Надо подсчитать, сколько времени осталось на выполнение оставшихся уроков :)
-        const lessons = 22,
-            points = 31;
+        const lessons = 25,
+            points = 36;
 
         setTimeout(() => {
             const timerDiploma = getTimeRemaining(deadLine),
                 h = timerDiploma.hours + 11,
                 m = timerDiploma.minutes,
                 t = (h * 60 + m) / (57 - points),
-                timer30 = getTimeRemaining('9 september 2021'),
+                timer30 = getTimeRemaining('10 september 2021'),
                 h30 = timer30.hours,
                 m30 = timer30.minutes,
                 t30 = (h30 * 60 + m30) / (30 - lessons);
-            console.log('Время на 1 урок: ' + Math.floor(t30 / 60) + ':' + Math.floor(t30 % 60));
-            console.log('Время на 1 балл: ' + Math.floor(t / 60) + ':' + Math.floor(t % 60));
+            console.log('Время на урок: ' + Math.floor(t30 / 60) + ':' + Math.floor(t30 % 60));
+            console.log('Время на балл: ' + Math.floor(t / 60) + ':' + Math.floor(t % 60));
         }, 3000);
     }
 
@@ -268,6 +268,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // ввод кириллицы
         const regex = /[^А-Яа-яЁё\s-]/g; // регулярка только русские буквы, пробел и дефис
+        const regexMessage = /[^А-Яа-яЁё\s-\.\!\?\,\:\;"]/g; // регулярка только русские буквы, пробел, дефис знаки препинания
         const yourName = document.querySelectorAll('[placeholder="Ваше имя"]'),
             yourMessage = document.querySelector('[placeholder="Ваше сообщение"]');
         yourName.forEach(item => {
@@ -300,11 +301,11 @@ window.addEventListener('DOMContentLoaded', () => {
             };
         });
         yourMessage.oninput = () => {
-            yourMessage.value = yourMessage.value.replace(regex, '');
+            yourMessage.value = yourMessage.value.replace(regexMessage, '');
         };
 
         // ввод email
-        // регулярка только латинские буквы и спецсимволы,
+        // регулярка только латинские буквы и спецсимволы + цифры,
         // но у меня нет идей, почему он допускает ввод пробела,
         // а потом удаляет его при вводе нового символа
         // eslint-disable-next-line no-useless-escape
@@ -315,14 +316,14 @@ window.addEventListener('DOMContentLoaded', () => {
                 item.value = item.value.replace(regexEm, '');
             };
             item.onchange = () => {
-                item.value = item.value.match(/\w+@\w+\.\w{2,3}/);
+                item.value = item.value.match(/\S+@\S+\.\w{2,3}/);
             };
         });
 
         // ввод номера телефона
-        // регулярка только цифры, круглые скобки и дефис
+        // регулярка только цифры, круглые скобки, дефис и +
         // eslint-disable-next-line no-useless-escape
-        const regexNumPhone = /[^0-9\(\)-]/g;
+        const regexNumPhone = /[^0-9\(\)-\+]/g;
         const phone = document.querySelectorAll('[type="tel"]');
         phone.forEach(item => {
             item.oninput = () => {
@@ -376,4 +377,61 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     };
     calc();
+
+    // отправка формы на сервер
+    const sendForm = () => {
+        const errorMessage = 'Что-то пошло не так',
+            loadMessage = 'Загрузка...',
+            successMessage = 'Отлично! Ответ получен!';
+
+        const forms = document.querySelectorAll('form');
+
+        const statusMessage = document.createElement('div');
+        statusMessage.style.cssText = 'font-size: 2rem;';
+
+        const postData = (body, outputData, errorData) => {
+            const request = new XMLHttpRequest();
+
+            request.addEventListener('readystatechange', () => {
+                if (request.readyState !== 4) {
+                    return;
+                }
+                console.log(request.status);
+
+                if (request.status === 200) {
+                    outputData();
+                } else {
+                    errorData(request.status);
+                }
+            });
+
+            request.open('POST', './server.php');
+            request.setRequestHeader('Content-type', 'aplication/json');
+
+            request.send(body);
+        };
+
+        forms.forEach(item => {
+            const formInputs = item.querySelectorAll('input');
+            item.addEventListener('submit', event => {
+                event.preventDefault();
+                item.appendChild(statusMessage);
+                statusMessage.textContent = loadMessage;
+                const formData = new FormData(item),
+                    body = {};
+
+                formData.forEach((val, key) => {
+                    body[key] = val;
+                });
+                postData(body, () => {
+                    statusMessage.textContent = successMessage;
+                    formInputs.forEach(input => input.value = '');
+                }, error => {
+                    statusMessage.textContent = errorMessage;
+                    console.error(error);
+                });
+            });
+        });
+    };
+    sendForm();
 });
