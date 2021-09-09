@@ -412,24 +412,16 @@ window.addEventListener('DOMContentLoaded', () => {
         statusMessage.style.cssText = 'font-size: 2rem;';
 
         // отправка на сервер
-        const postData = body => new Promise((resolve, reject) => {
-            const request = new XMLHttpRequest();
-
-            request.addEventListener('readystatechange', () => {
-                if (request.readyState === 4 && request.status === 200) {
-                    return resolve();
-                } else if (request.readyState === 4) {
-                    console.log(request.status);
-                    return reject(request.status);
-                } else {
-                    return;
-                }
-            });
-
-            request.open('POST', './server.php');
-            request.setRequestHeader('Content-type', 'aplication/json');
-            console.log(body);
-            request.send(JSON.stringify(body));
+        const postData = body => fetch('./server.php', {
+            method: 'POST',
+            mode: 'same-origin',
+            credentials: 'same-origin',
+            headers: {
+                'Content-type': 'aplication/json',
+            },
+            redirect: 'follow',
+            referrer: 'client',
+            body: JSON.stringify(body)
         });
 
         forms.forEach(item => {
@@ -446,7 +438,10 @@ window.addEventListener('DOMContentLoaded', () => {
                         body[key] = val;
                     });
                     postData(body)
-                        .then(() => {
+                        .then(response => {
+                            if (response.status !== 200) {
+                                throw new Error('status network not 200');
+                            }
                             statusMessage.textContent = successMessage;
                             formInputs.forEach(input => input.value = '');
                         })
