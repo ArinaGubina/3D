@@ -36,7 +36,7 @@ const calc = (price = 100) => {
     calcBlock.addEventListener('change', event => {
         const target = event.target;
         if (target.matches('select')) {
-            if (target.type.value === '') {
+            if (calcType.options[calcType.selectedIndex].value === "") {
                 calcSquare.value = '';
                 calcDay.value = '';
                 calcCount.value = '';
