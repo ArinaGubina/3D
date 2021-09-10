@@ -14,9 +14,9 @@ const sendForm = () => {
         });
         return validation;
     };
-    const errorMessage = 'Что-то пошло не так',
+    const errorMessage = 'Что-то пошло не так:(',
         loadMessage = 'Загрузка...',
-        successMessage = 'Отлично! Ответ получен!',
+        successMessage = 'Отлично! Ответ получен!!!',
         errorField = 'Поле заполнено неверно';
 
     const forms = document.querySelectorAll('form');
@@ -42,8 +42,10 @@ const sendForm = () => {
         item.addEventListener('submit', event => {
             event.preventDefault();
             item.appendChild(statusMessage);
-            console.log(validate(formInputs));
             if (validate(formInputs)) {
+                if (item.id === 'form3') {
+                    statusMessage.style.color = 'white';
+                }
                 statusMessage.textContent = loadMessage;
                 const formData = new FormData(item),
                     body = {};
@@ -56,6 +58,11 @@ const sendForm = () => {
                             throw new Error('status network not 200');
                         }
                         statusMessage.textContent = successMessage;
+                        setTimeout(() => {
+                            statusMessage.remove();
+                            const popup = document.querySelector('.popup');
+                            popup.style.display = 'none';
+                        }, 2500);
                         formInputs.forEach(input => input.value = '');
                     })
                     .catch(error => {

@@ -35,7 +35,12 @@ const calc = (price = 100) => {
     };
     calcBlock.addEventListener('change', event => {
         const target = event.target;
-        if (target.matches('select') || target.matches('input')) {
+        if (target.matches('select')) {
+            calcSquare.value = '';
+            calcDay.value = '';
+            calcCount.value = '';
+            countSum();
+        } else if (target.matches('input')) {
             countSum();
         }
     });
