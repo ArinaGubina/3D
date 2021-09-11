@@ -15,7 +15,7 @@ const sendForm = () => {
         return validation;
     };
     const errorMessage = 'Что-то пошло не так:(',
-        loadMessage = 'Загрузка...',
+        // loadMessage = 'Загрузка...',
         successMessage = 'Отлично! Ответ получен!!!',
         errorField = 'Поле заполнено неверно';
 
@@ -23,6 +23,27 @@ const sendForm = () => {
 
     const statusMessage = document.createElement('div');
     statusMessage.style.cssText = 'font-size: 2rem;';
+
+    const loadingImg = document.createElement('img');
+    let loadingInterval;
+
+    const loading = elem => {
+        loadingImg.style.cssText = `display: block; position: fixed; 
+        top: calc(50% - 80px); left: calc(50% - 80px); width: 160px;`;
+        loadingImg.setAttribute('src', './images/loading.png');
+
+        elem.appendChild(loadingImg);
+        let deg;
+        const loadingAnimate = () => {
+            loadingInterval = requestAnimationFrame(loadingAnimate);
+            deg -= 15;
+            loadingImg.style.transform = `rotate(${deg}deg)`;
+        };
+
+        deg = 360;
+        loadingImg.style.transform = `rotate(${deg}deg)`;
+        loadingInterval = requestAnimationFrame(loadingAnimate);
+    };
 
     // отправка на сервер
     const postData = body => fetch('./server.php', {
@@ -42,11 +63,12 @@ const sendForm = () => {
         item.addEventListener('submit', event => {
             event.preventDefault();
             item.appendChild(statusMessage);
+            statusMessage.textContent = "";
             if (validate(formInputs)) {
                 if (item.id === 'form3') {
                     statusMessage.style.color = 'white';
                 }
-                statusMessage.textContent = loadMessage;
+                loading(item);
                 const formData = new FormData(item),
                     body = {};
                 formData.forEach((val, key) => {
@@ -57,6 +79,8 @@ const sendForm = () => {
                         if (response.status !== 200) {
                             throw new Error('status network not 200');
                         }
+                        cancelAnimationFrame(loadingInterval);
+                        loadingImg.remove();
                         statusMessage.textContent = successMessage;
                         setTimeout(() => {
                             statusMessage.remove();
